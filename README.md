@@ -1,5 +1,5 @@
-````markdown
-# 🛠️ Helios Scheduler Module
+````
+## Helios Scheduler Module
 
 This repository contains the **Schedule Optimization Module** for the **Helios System** — developed as part of Global Turbine Asia’s internal asset management and task scheduling system.
 
@@ -157,7 +157,5 @@ http://127.0.0.1:8000/api/
 🛰️ *Helios Scheduler — powering smart, efficient task allocation for next-generation aerospace maintenance systems.*
 
 ```
-
----
 
 
