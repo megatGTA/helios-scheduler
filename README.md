@@ -152,10 +152,6 @@ http://127.0.0.1:8000/api/
 * Implement **Schedule Optimization Logic**
 * Add **WebSocket** for Real-time Status Updates
 
----
 
-🛰️ *Helios Scheduler — powering smart, efficient task allocation for next-generation aerospace maintenance systems.*
-
-```
 
 
