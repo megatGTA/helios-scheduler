@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ScheduleTask extends Model
 {
@@ -13,9 +13,12 @@ class ScheduleTask extends Model
         'work_order_id',
         'task_name',
         'description',
-        'start_time',
-        'end_time',
-        'status'
+        'start_date',
+        'due_date',
+        'planned_date',
+        'asset_name',
+        'status',
+        'cs_id'
     ];
 
     public function workOrder()
@@ -23,8 +26,8 @@ class ScheduleTask extends Model
         return $this->belongsTo(WorkOrder::class);
     }
 
-    public function assignments()
+    public function cs()
     {
-        return $this->hasMany(Assignment::class);
+        return $this->belongsTo(Technician::class, 'cs_id');
     }
 }

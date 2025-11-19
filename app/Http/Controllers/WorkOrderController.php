@@ -3,39 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Models\WorkOrder;
+use App\Models\WorkOrderHandoverLog;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 
 class WorkOrderController extends Controller
 {
     /**
-     * Display a paginated listing of work orders.
+     * List all Work Orders (with CS + Tasks).
      */
     public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->query('per_page', 15);
+
         $query = WorkOrder::with([
-            'scheduleTasks.assignments.technician.role'
+            'cs',                 // Work Order owner
+            'scheduleTasks.cs'    // Tasks + inherited CS
         ]);
 
-        // Optional filters
         if ($request->has('priority')) {
             $query->where('priority', (int) $request->query('priority'));
         }
 
-        if ($request->has('status')) {
-            // if you later add a status column: $query->where('status', $request->query('status'));
-        }
-
-        $data = $query->orderBy('created_at', 'desc')->paginate($perPage);
-
-        return response()->json($data);
+        return response()->json(
+            $query->orderBy('created_at', 'desc')->paginate($perPage)
+        );
     }
 
     /**
-     * Store a newly created work order.
+     * Create Work Order
      */
     public function store(Request $request): JsonResponse
     {
@@ -43,6 +40,7 @@ class WorkOrderController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'priority' => 'required|integer|between:1,3',
+            'cs_id' => 'nullable|exists:technicians,id',
             'start_date' => 'nullable|date',
             'due_date' => 'nullable|date|after_or_equal:start_date',
             'engine_type' => 'nullable|string|max:255',
@@ -51,29 +49,98 @@ class WorkOrderController extends Controller
         ]);
 
         $workOrder = DB::transaction(function () use ($validated) {
-            return WorkOrder::create($validated);
+            $wo = WorkOrder::create($validated);
+
+            if (isset($validated['cs_id'])) {
+                $wo->scheduleTasks()->update([
+                    'cs_id' => $validated['cs_id']
+                ]);
+            }
+
+            return $wo;
         });
 
         return response()->json([
-            'message' => 'Work order created',
-            'data' => $workOrder->load('scheduleTasks'),
+            'message' => 'Work order created successfully',
+            'data' => $workOrder->load(['cs', 'scheduleTasks.cs']),
         ], 201);
     }
 
     /**
-     * Display the specified work order.
+     * Display Single Work Order.
      */
     public function show(WorkOrder $workOrder): JsonResponse
     {
-        $workOrder->load('scheduleTasks.assignments.technician.role');
-
         return response()->json([
-            'data' => $workOrder,
+            'data' => $workOrder->load(['cs', 'scheduleTasks.cs']),
         ]);
     }
+    /**
+     * Get handover history for a Work Order.
+     */
+    public function handoverLogs(WorkOrder $workOrder): JsonResponse
+    {
+        $logs = $workOrder->handoverLogs()
+            ->with(['oldCS','newCS','changer'])
+            ->orderBy('changed_at','desc')
+            ->get();
+
+        return response()->json([
+            'work_order_id' => $workOrder->id,
+            'handover_logs' => $logs
+        ]);
+    }
+    /**
+ * Explicit Work Order Handover (WM action).
+ */
+    public function handover(Request $request, WorkOrder $workOrder): JsonResponse
+    {
+        $validated = $request->validate([
+            'new_cs_id' => 'required|exists:technicians,id',
+            'reason' => 'nullable|string'
+    ]);
+
+        $oldCs = $workOrder->cs_id;
+        $newCs = $validated['new_cs_id'];
+
+    // Prevent pointless handover
+        if ($oldCs == $newCs) {
+            return response()->json([
+                'message' => 'Work Order is already assigned to this CS.'
+            ], 409);
+    }
+
+    DB::transaction(function () use ($workOrder, $oldCs, $newCs, $validated) {
+
+        // Create handover log
+        \App\Models\WorkOrderHandoverLog::create([
+            'work_order_id' => $workOrder->id,
+            'old_cs_id' => $oldCs,
+            'new_cs_id' => $newCs,
+            'changed_by' => auth()->id(),
+            'reason' => $validated['reason'] ?? null,
+            'changed_at' => now(),
+        ]);
+
+        // Update CS on Work Order
+        $workOrder->update([
+            'cs_id' => $newCs
+        ]);
+
+        // Update CS for all tasks
+        $workOrder->scheduleTasks()->update([
+            'cs_id' => $newCs
+        ]);
+    });
+
+    return response()->json([
+        'message' => 'Work Order handed over successfully.',
+        'data' => $workOrder->fresh()->load(['cs', 'scheduleTasks.cs'])
+    ]);
+}
 
     /**
-     * Update the specified work order.
+     * Update Work Order (including handover).
      */
     public function update(Request $request, WorkOrder $workOrder): JsonResponse
     {
@@ -81,33 +148,56 @@ class WorkOrderController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'priority' => 'sometimes|required|integer|between:1,3',
+            'cs_id' => 'sometimes|exists:technicians,id',
             'start_date' => 'nullable|date',
             'due_date' => 'nullable|date|after_or_equal:start_date',
             'engine_type' => 'nullable|string|max:255',
             'engine_part_number' => 'nullable|string|max:255',
             'engine_serial_number' => 'nullable|string|max:255',
+            'handover_reason' => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($workOrder, $validated) {
+
+            if (isset($validated['cs_id'])) {
+                $oldCs = $workOrder->cs_id;
+                $newCs = $validated['cs_id'];
+
+                if ($oldCs != $newCs) {
+
+                    // Save handover log
+                    WorkOrderHandoverLog::create([
+                        'work_order_id' => $workOrder->id,
+                        'old_cs_id' => $oldCs,
+                        'new_cs_id' => $newCs,
+                        'changed_by' => auth()->id(),
+                        'reason' => $validated['handover_reason'] ?? null,
+                        'changed_at' => now(),
+                    ]);
+
+                    // Update task assignments
+                    $workOrder->scheduleTasks()->update([
+                        'cs_id' => $newCs
+                    ]);
+                }
+            }
+
             $workOrder->update($validated);
         });
 
         return response()->json([
-            'message' => 'Work order updated',
-            'data' => $workOrder->fresh()->load('scheduleTasks'),
+            'message' => 'Work order updated successfully',
+            'data' => $workOrder->fresh()->load(['cs', 'scheduleTasks.cs']),
         ]);
     }
 
     /**
-     * Remove the specified work order.
+     * Deletion disabled (traceability requirement).
      */
-    public function destroy(WorkOrder $workOrder): JsonResponse
+    public function destroy()
     {
-        // If you want soft deletes, implement softDeletes in model and use $workOrder->delete()
-        $workOrder->delete();
-
         return response()->json([
-            'message' => 'Work order deleted',
-        ]);
+            'message' => 'Deleting Work Orders is not allowed for traceability reasons.'
+        ], 403);
     }
 }
