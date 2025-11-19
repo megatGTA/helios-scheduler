@@ -1,28 +1,31 @@
----
-## Helios Scheduler Module
+# Helios Scheduler Module
 
-This repository contains the **Schedule Optimization Module** for the **Helios System** — developed as part of Global Turbine Asia’s internal asset management and task scheduling system.
+This repository contains the **Schedule Optimization Module** for the **Helios System**, developed for Global Turbine Asia.  
+It provides the backend logic for **Work Orders**, **Task Scheduling**, **Technician Management**, and **CS Handover Tracking**.
 
 ---
 
 ## 🚀 Overview
 
-The **Helios Scheduler Module** provides a backend API for:
-- Work Order Management  
-- Task Scheduling and Assignment  
-- Technician Role Tracking  
-- Real-time Schedule Updates and Optimization  
+The **Helios Scheduler Module** is a standalone Laravel backend service that supports:
 
-It’s a modular **Laravel 12.x** backend designed to integrate seamlessly with the main Helios platform or operate as a standalone service for testing and API validation.
+- Work Order lifecycle management  
+- Task scheduling under each Work Order  
+- Real-time CS handover history  
+- Technician role mapping  
+- Data API for calendar & planning dashboards  
+- To be integrated with the main Helios system  
+
+Built with extensibility in mind, this module acts as the foundation for upcoming **schedule optimization**, **workforce planning**, and **calendar UI** features.
 
 ---
 
 ## 🧩 Tech Stack
 
-- **Framework:** Laravel 12.x  
-- **Language:** PHP 8.x  
+- **Laravel:** 12.x  
+- **PHP:** 8.x  
 - **Database:** MySQL  
-- **Frontend (up next):** Blade + Tailwind CSS  
+- **Frontend (next phase):** Blade + Tailwind + jQuery or Alpine.js  
 - **Version Control:** Git + GitHub  
 
 ---
@@ -31,21 +34,22 @@ It’s a modular **Laravel 12.x** backend designed to integrate seamlessly with 
 
 | Table | Description |
 |--------|-------------|
-| `work_orders` | Stores work order details (engine type, priority, due date, etc.) |
-| `schedule_tasks` | Contains specific scheduled tasks under each work order |
-| `technicians` | Technician profiles and assigned roles |
-| `roles` | Defines roles (e.g., Technician, Supervisor) |
-| `assignments` | Links technicians to schedule tasks |
+| `work_orders` | Stores work order details (priority, CS, engine info, date range) |
+| `schedule_tasks` | Tasks belonging to each Work Order |
+| `technicians` | Users with technician roles |
+| `roles` | Defines roles (WM, CS, Admin) |
+| `work_order_handover_logs` | Tracks each CS change event for traceability |
 
 ---
 
 ## ⚙️ Setup Instructions
 
 ### 1️⃣ Clone the repository
+
 ```bash
 git clone https://github.com/megatGTA/helios-scheduler.git
 cd helios-scheduler
-````
+```
 
 ### 2️⃣ Install dependencies
 
@@ -53,34 +57,34 @@ cd helios-scheduler
 composer install
 ```
 
-### 3️⃣ Set up environment
-
-Copy and configure your `.env`:
+### 3️⃣ Create .env
 
 ```bash
 cp .env.example .env
 ```
 
-Update database details:
+Update your MySQL credentials:
 
 ```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
 DB_DATABASE=helios_schedule
 DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-### 4️⃣ Generate key and run migrations
+### 4️⃣ Migrate + Seed
 
 ```bash
 php artisan key:generate
-php artisan migrate
+php artisan migrate:fresh --seed
+```
+
+### 5️⃣ Start server
+
+```bash
 php artisan serve
 ```
 
-Your API is now running at:
+➡️ API Base URL:
 
 ```
 http://127.0.0.1:8000/api/
@@ -88,48 +92,118 @@ http://127.0.0.1:8000/api/
 
 ---
 
+## 🌱 Database Seeders (Included)
+
+The project includes demo seeders:
+
+| Seeder | Description |
+|--------|-------------|
+| `RoleSeeder` | Creates WM + CS roles |
+| `UserSeeder` | Creates mock WM + CS users |
+| `TechnicianSeeder` | Maps users → technicians |
+
+Run:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+---
+
 ## 🧠 API Endpoints
 
-| Method | Endpoint              | Description                |
-| ------ | --------------------- | -------------------------- |
-| GET    | `/api/work-orders`    | List all work orders       |
-| POST   | `/api/work-orders`    | Create a new work order    |
-| GET    | `/api/schedule-tasks` | List all schedule tasks    |
-| POST   | `/api/schedule-tasks` | Create a new schedule task |
-| GET    | `/api/assignments`    | List all task assignments  |
-| POST   | `/api/assignments`    | Assign technician to task  |
-| GET    | `/api/technicians`    | List all technicians       |
-| POST   | `/api/technicians`    | Register a technician      |
-| GET    | `/api/roles`          | List all roles             |
-| POST   | `/api/roles`          | Create new role            |
+### 🔹 Work Orders
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/work-orders` | List all Work Orders |
+| POST | `/api/work-orders` | Create Work Order |
+| GET | `/api/work-orders/{id}` | View Work Order |
+| PUT | `/api/work-orders/{id}` | Update Work Order (includes auto-handover logic) |
+| POST | `/api/work-orders/{id}/handover` | Perform Work Order handover |
+| GET | `/api/work-orders/{id}/handover-logs` | View handover history |
+
+### 🔹 Schedule Tasks
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/schedule-tasks` | List all tasks |
+| POST | `/api/schedule-tasks` | Create task under Work Order |
+| GET | `/api/schedule-tasks/{id}` | View task |
+| PUT | `/api/schedule-tasks/{id}` | Update task |
+
+Tasks automatically inherit the `cs_id` of their Work Order.
+
+### 🔹 Technicians & Roles
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/technicians` | List technicians |
+| POST | `/api/technicians` | Register technician |
+| GET | `/api/roles` | List roles |
+| POST | `/api/roles` | Create role |
 
 ---
 
-## 📦 Example Workflow
+## 🔄 Work Order Handover – Example
 
-1️⃣ Create a **Work Order**
-2️⃣ Add **Schedule Tasks** under it
-3️⃣ Register **Technicians** and **Roles**
-4️⃣ Assign Technicians to Tasks
-5️⃣ Fetch via API to view the complete schedule hierarchy
+### POST `/api/work-orders/{id}/handover`
+
+**Request:**
+
+```json
+{
+  "new_cs_id": 3,
+  "reason": "Transfer to CS Zahid due to workload"
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "Work Order handed over successfully.",
+  "data": {
+    "id": 1,
+    "cs_id": 3,
+    "schedule_tasks": [
+      { "id": 1, "cs_id": 3 }
+    ]
+  }
+}
+```
+
+### GET `/api/work-orders/{id}/handover-logs`
+
+```json
+{
+  "work_order_id": 1,
+  "handover_logs": [
+    {
+      "old_cs_id": 2,
+      "new_cs_id": 3,
+      "reason": "Transfer to CS Zahid due to workload",
+      "changed_at": "2025-11-18 07:59:48"
+    }
+  ]
+}
+```
 
 ---
 
-## 📘 Example JSON Response
+## 📘 Example Work Order Response
 
 ```json
 {
   "id": 1,
-  "title": "Engine Inspection A1",
-  "description": "Full turbine inspection",
-  "priority": 2,
-  "engine_type": "CFM56",
-  "tasks": [
+  "title": "WO Test 04",
+  "priority": 1,
+  "cs": { "name": "CS Ahmad" },
+  "schedule_tasks": [
     {
-      "task_name": "Visual Inspection",
+      "task_name": "Check Fuel Nozzle",
       "status": "pending",
-      "technician": "Zahid",
-      "role": "Technician"
+      "cs": { "name": "CS Ahmad" }
     }
   ]
 }
@@ -139,19 +213,41 @@ http://127.0.0.1:8000/api/
 
 ## 👨‍💻 Developer Notes
 
-* Developer: **Megat**
-* Project: **Helios - Schedule Optimization Module**
-* Framework: Laravel 12.x
-* Status: ✅ Backend Completed, UI Development Next
+- **Developer:** Megat  
+- **Project:** Helios — Schedule Optimization Module  
+- **Backend:** Completed  
+
+### Next Phase:
+- ✅ Calendar UI (Blade)  
+- ✅ Planning Dashboard  
+- ✅ Optimization Engine  
 
 ---
 
-## 🌱 Next Phase
+## 🌟 Next Phase (Frontend)
 
-* Build the **Frontend UI Dashboard** (Blade + Tailwind)
-* Implement **Schedule Optimization Logic**
-* Add **WebSocket** for Real-time Status Updates
+After backend is stable, UI development will begin:
 
+### Upcoming UI Pages
+- Calendar Schedule View  
+- Planning Dashboard  
+- Workforce Allocation Matrix  
+- Optimization Workspace  
 
+---
 
+## 📝 License
 
+This project is proprietary and confidential. Developed for Global Turbine Asia.
+
+---
+
+## 🤝 Contributing
+
+For internal development only. Contact the project maintainer for access.
+
+---
+
+## 📧 Contact
+
+For questions or support, reach out to the development team.
