@@ -1,0 +1,111 @@
+{
+    "info": {
+      "_postman_id": "f8d3a982-671c-4759-b7f8-5a99816dd9bc",
+      "name": "Helios Schedule Module",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Create Work Order",
+        "request": {
+          "method": "POST",
+          "header": [],
+          "url": {
+            "raw": "http://127.0.0.1:8000/api/work-orders",
+            "protocol": "http",
+            "host": ["127","0","0","1"],
+            "port": "8000",
+            "path": ["api","work-orders"]
+          },
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"title\": \"WO Test 01\",\n  \"priority\": 2,\n  \"cs_id\": 2,\n  \"start_date\": \"2025-11-20\",\n  \"due_date\": \"2025-11-25\"\n}"
+          }
+        }
+      },
+  
+      {
+        "name": "Get All Work Orders",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://127.0.0.1:8000/api/work-orders",
+            "protocol": "http",
+            "host": ["127","0","0","1"],
+            "port": "8000",
+            "path": ["api","work-orders"]
+          }
+        }
+      },
+  
+      {
+        "name": "Get Single Work Order",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://127.0.0.1:8000/api/work-orders/1",
+            "protocol": "http",
+            "host": ["127","0","0","1"],
+            "port": "8000",
+            "path": ["api","work-orders","1"]
+          }
+        }
+      },
+  
+      {
+        "name": "Create Schedule Task",
+        "request": {
+          "method": "POST",
+          "header": [],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"work_order_id\": 1,\n  \"task_name\": \"Inspect Engine\",\n  \"planned_date\": \"2025-11-21\"\n}"
+          },
+          "url": {
+            "raw": "http://127.0.0.1:8000/api/schedule-tasks",
+            "protocol": "http",
+            "host": ["127","0","0","1"],
+            "port": "8000",
+            "path": ["api","schedule-tasks"]
+          }
+        }
+      },
+  
+      {
+        "name": "Handover Work Order",
+        "request": {
+          "method": "POST",
+          "header": [],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"new_cs_id\": 3,\n  \"reason\": \"Shift handover\"\n}"
+          },
+          "url": {
+            "raw": "http://127.0.0.1:8000/api/work-orders/1/handover",
+            "protocol": "http",
+            "host": ["127","0","0","1"],
+            "port": "8000",
+            "path": ["api","work-orders","1","handover"]
+          }
+        }
+      },
+  
+      {
+        "name": "Get Handover Logs",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://127.0.0.1:8000/api/work-orders/1/handover-logs",
+            "protocol": "http",
+            "host": ["127","0","0","1"],
+            "port": "8000",
+            "path": ["api","work-orders","1","handover-logs"]
+          }
+        }
+      }
+    ]
+  }
+  

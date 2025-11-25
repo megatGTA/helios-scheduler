@@ -1,0 +1,246 @@
+{
+    "info": {
+        "name": "Helios Scheduler API (Full Dev Version)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Work Orders",
+            "item": [
+                {
+                    "name": "GET - List All",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/work-orders"
+                    }
+                },
+                {
+                    "name": "GET - Get One",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/work-orders/1"
+                    }
+                },
+                {
+                    "name": "POST - Create",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/work-orders"
+                    }
+                },
+                {
+                    "name": "PUT - Update",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/work-orders/1"
+                    }
+                },
+                {
+                    "name": "GET - Tasks Under Work Order",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/work-orders/1/tasks"
+                    }
+                },
+                {
+                    "name": "GET - Details",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/work-orders/1/details"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Schedule Tasks",
+            "item": [
+                {
+                    "name": "GET - List All",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/schedule-tasks"
+                    }
+                },
+                {
+                    "name": "GET - Get One",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/schedule-tasks/1"
+                    }
+                },
+                {
+                    "name": "POST - Create",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/schedule-tasks"
+                    }
+                },
+                {
+                    "name": "PUT - Update",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/schedule-tasks/1"
+                    }
+                },
+                {
+                    "name": "GET - Task Details",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/schedule-tasks/1/details"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Technicians",
+            "item": [
+                {
+                    "name": "GET - List All",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/technicians"
+                    }
+                },
+                {
+                    "name": "POST - Create",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/technicians"
+                    }
+                },
+                {
+                    "name": "GET - Get One",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/technicians/1"
+                    }
+                },
+                {
+                    "name": "PUT - Update",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/technicians/1"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Manhour Plans",
+            "item": [
+                {
+                    "name": "GET - List All",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/manhour-plans"
+                    }
+                },
+                {
+                    "name": "POST - Create",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/manhour-plans"
+                    }
+                },
+                {
+                    "name": "GET - Get One",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/manhour-plans/1"
+                    }
+                },
+                {
+                    "name": "PUT - Update",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/manhour-plans/1"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Approvals",
+            "item": [
+                {
+                    "name": "GET - List All",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/approvals"
+                    }
+                },
+                {
+                    "name": "POST - Create",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/approvals"
+                    }
+                },
+                {
+                    "name": "GET - Get One",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/approvals/1"
+                    }
+                },
+                {
+                    "name": "PUT - Update",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/approvals/1"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Handover Logs",
+            "item": [
+                {
+                    "name": "GET - Work Order Handover Logs",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/work-orders/1/handover-logs"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Admin \u2013 Dangerous (Development Only)",
+            "item": [
+                {
+                    "name": "DELETE Work Order",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{base_url}}/work-orders/1"
+                    }
+                },
+                {
+                    "name": "DELETE Schedule Task",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{base_url}}/schedule-tasks/1"
+                    }
+                },
+                {
+                    "name": "DELETE Technician",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{base_url}}/technicians/1"
+                    }
+                },
+                {
+                    "name": "DELETE Manhour Plan",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{base_url}}/manhour-plans/1"
+                    }
+                },
+                {
+                    "name": "DELETE Approval",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{base_url}}/approvals/1"
+                    }
+                }
+            ]
+        }
+    ]
+}
