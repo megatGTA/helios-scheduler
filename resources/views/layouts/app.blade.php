@@ -79,6 +79,8 @@
 
     @stack('scripts')
 
+    @yield('scripts')
+
     <script>
 document.addEventListener('DOMContentLoaded', function () {
 

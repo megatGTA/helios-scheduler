@@ -25,7 +25,12 @@
             "ScheduleModule\\": "schedule-module/app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "exclude-from-classmap": [
+            "vendor/league/flysystem-local/*",
+            "vendor/league/flysystem/src/Local/*",
+            "vendor/laravel/pint/app/Providers/AppServiceProvider.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -75,13 +80,6 @@
     },
     "config": {
         "optimize-autoloader": true,
-        "exclude-from-classmap": [
-            "vendor/league/flysystem/src/Local",
-            "vendor/league/flysystem/src/Local/*",
-            "vendor/league/flysystem-local/tests",
-            "vendor/league/flysystem-local/LocalFilesystemAdapterTest.php",
-            "vendor/laravel/pint/app/Providers/AppServiceProvider.php"
-        ],
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
