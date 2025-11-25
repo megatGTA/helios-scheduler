@@ -75,6 +75,13 @@
     },
     "config": {
         "optimize-autoloader": true,
+        "exclude-from-classmap": [
+            "vendor/league/flysystem/src/Local",
+            "vendor/league/flysystem/src/Local/*",
+            "vendor/league/flysystem-local/tests",
+            "vendor/league/flysystem-local/LocalFilesystemAdapterTest.php",
+            "vendor/laravel/pint/app/Providers/AppServiceProvider.php"
+        ],
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
